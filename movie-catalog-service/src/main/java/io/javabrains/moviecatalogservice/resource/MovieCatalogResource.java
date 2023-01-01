@@ -4,6 +4,7 @@ package io.javabrains.moviecatalogservice.resource;
 import io.javabrains.moviecatalogservice.models.CatalogItem;
 import io.javabrains.moviecatalogservice.models.Movie;
 import io.javabrains.moviecatalogservice.models.Rating;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -15,6 +16,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/catalog")
 public class MovieCatalogResource {
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @RequestMapping(value = "/{userID}")
     public List<CatalogItem> getCatalog(@PathVariable("userID") String userID) {
