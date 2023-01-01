@@ -7,6 +7,7 @@ import io.javabrains.moviecatalogservice.models.Rating;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,11 +21,13 @@ public class MovieCatalogResource {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private WebClient.Builder webClientBuilder;
+
     @RequestMapping(value = "/{userID}")
     public List<CatalogItem> getCatalog(@PathVariable("userID") String userID) {
 
-        RestTemplate restTemplate = new RestTemplate();
-        Movie movie = restTemplate.getForObject("http://localhost:8082/movies/vibhushit", Movie.class);
+
 
         List<Rating> ratings = Arrays.asList(
                 new Rating("1234", 4),
@@ -33,10 +36,18 @@ public class MovieCatalogResource {
 
         return ratings.stream().map(rating -> {
 
-            restTemplate.getForObject("http://localhost:8082/movies/" + rating.getMovieId(), Movie.class);
-            return new CatalogItem(movie.getName(), "Test", rating.getRating());
+                    Movie movie = restTemplate.getForObject("http://localhost:8082/movies/" + rating.getMovieId(), Movie.class);
 
-        })
+                    /* Movie movie = webClientBuilder.build()
+                            .get()
+                            .uri("http://localhost:8082/movies/" + rating.getMovieId())
+                            .retrieve()
+                            .bodyToMono(Movie.class)
+                            .block();
+                     */
+                    return new CatalogItem(movie.getName(), "Test", rating.getRating());
+
+                })
                 .collect(Collectors.toList());
 
     }
