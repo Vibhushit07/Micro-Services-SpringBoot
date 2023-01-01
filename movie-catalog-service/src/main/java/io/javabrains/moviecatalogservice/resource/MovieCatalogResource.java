@@ -4,6 +4,7 @@ package io.javabrains.moviecatalogservice.resource;
 import io.javabrains.moviecatalogservice.models.CatalogItem;
 import io.javabrains.moviecatalogservice.models.Movie;
 import io.javabrains.moviecatalogservice.models.Rating;
+import io.javabrains.moviecatalogservice.models.UserRating;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -27,24 +28,12 @@ public class MovieCatalogResource {
     @RequestMapping(value = "/{userID}")
     public List<CatalogItem> getCatalog(@PathVariable("userID") String userID) {
 
+        UserRating userRating = restTemplate.getForObject("http://localhost:8083/ratingsdata/users/" + userID, UserRating.class);
 
-
-        List<Rating> ratings = Arrays.asList(
-                new Rating("1234", 4),
-                new Rating("5879", 3)
-        );
-
-        return ratings.stream().map(rating -> {
+        return userRating.getUserRating().stream().map(rating -> {
 
                     Movie movie = restTemplate.getForObject("http://localhost:8082/movies/" + rating.getMovieId(), Movie.class);
 
-                    /* Movie movie = webClientBuilder.build()
-                            .get()
-                            .uri("http://localhost:8082/movies/" + rating.getMovieId())
-                            .retrieve()
-                            .bodyToMono(Movie.class)
-                            .block();
-                     */
                     return new CatalogItem(movie.getName(), "Test", rating.getRating());
 
                 })
@@ -52,3 +41,14 @@ public class MovieCatalogResource {
 
     }
 }
+
+/*
+Line number 35 can be made asynchronous with this code
+        Movie movie = webClientBuilder.build()
+                            .get()
+                            .uri("http://localhost:8082/movies/" + rating.getMovieId())
+                            .retrieve()
+                            .bodyToMono(Movie.class)
+                            .block();
+
+*/
